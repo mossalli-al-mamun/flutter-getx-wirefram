@@ -1,0 +1,1 @@
+bool isNetworkImage(String path) => path.startsWith('http');

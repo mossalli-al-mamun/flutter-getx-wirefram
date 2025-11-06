@@ -1,0 +1,9 @@
+arb-dir: lib/l10n
+template-arb-file: intl_en.arb
+output-localization-file: app_localizations.dart
+use-escaping: true #Sometimes, you have to use tokens, such as { and }, as normal characters. use true otherwise false
+#preferred-supported-locales: [en, es, ar]
+output-dir: lib/l10n/generated
+output-class: AppLocalizations
+use-deferred-loading: true
+nullable-getter: false
