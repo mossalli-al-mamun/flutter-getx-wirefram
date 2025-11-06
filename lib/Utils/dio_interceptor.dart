@@ -34,8 +34,19 @@ class DioInterceptors extends Interceptor {
     // Resolve current language code
     final savedLocale = LocalStorageManager.readData('locale');
     final String langCode = (get_x.Get.locale?.languageCode ?? (savedLocale is String ? savedLocale : null) ?? 'en').toString();
+    // Skip token for login (or any unauthenticated endpoint)
+    final isLoginEndpoint =
+        options.path.contains('/jwt-auth/v1/token') ||
+            options.path.contains('/wp-json/jwt-auth/v1/token');
 
-    options.headers["authorization"] = 'Bearer $token';
+    if (!isLoginEndpoint) {
+      // Only add token if not login request
+      token = await TokenManager().readToken();
+      if (token?.isNotEmpty == true) {
+        options.headers["authorization"] = 'Bearer $token';
+      }
+    }
+
     options.queryParameters["locale"] = langCode;
 
     appLogger('REQUEST[${options.method}] => PATH: ${options.uri}');

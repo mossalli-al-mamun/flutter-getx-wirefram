@@ -1,24 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_getx_wireframe/Config/themes/dark_theme.dart';
-import 'package:flutter_getx_wireframe/Navigation/bottomTab/bottom_tabs.dart';
-import 'package:flutter_getx_wireframe/Widgets/app_scaffold.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:upgrader/upgrader.dart';
 import 'Config/themes/text_styles.dart';
 import 'Config/themes/light_theme.dart';
 import 'Config/themes/theme_controller.dart';
-import 'Controller/locale/locale_controller.dart';
-import 'Controller/locale/localization_service_controller.dart';
 import 'Navigation/routes.dart';
 import 'Screens/Auth/signin.dart';
 import 'Screens/DashBoard/index.dart';
-import 'Utils/app_logger.dart';
 import 'Utils/local_storage_manager.dart';
 import 'Utils/pop_scope_wrapper.dart';
 import 'Utils/token_manager.dart';
 import 'Widgets/app_loaders.dart';
-import 'Widgets/form/unified_input_field.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'Utils/global_variables.dart';
 
@@ -73,10 +66,6 @@ class MyAppState extends State<MyApp> {
     return FutureBuilder<String?>(
       future: TokenManager().readToken(),
       builder: (context, snapshot) {
-        appLogger('The local...${Get.locale}');
-        // return SignIn();
-        // return AppScaffold(body: ExampleFormUsage());
-        return BottomTabs();
         switch (snapshot.connectionState) {
           case ConnectionState.none:
             return const Scaffold(body: Center(child: AppLoader()));

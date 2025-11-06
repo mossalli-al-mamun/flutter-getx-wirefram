@@ -4,6 +4,7 @@ import '../Controller/locale/localization_service_controller.dart';
 import '../Screens/Auth/forgot_password.dart';
 import '../Screens/Auth/signin.dart';
 import '../Screens/Auth/signup.dart';
+import 'bottomTab/bottom_tabs.dart';
 
 class AppRoutes {
   static const String signIn = '/signIn';
@@ -22,8 +23,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => SignUp());
       case forgotPassword:
         return MaterialPageRoute(builder: (_) => ForgotPassword());
-      // case dashboard:
-      //   return MaterialPageRoute(builder: (_) => const BottomTab());
+      case dashboard:
+        return MaterialPageRoute(builder: (_) => const BottomTabs());
 
       default:
         return MaterialPageRoute(

@@ -6,20 +6,17 @@ import 'package:flutter_getx_wireframe/Navigation/navigation_ext.dart';
 import 'package:flutter_getx_wireframe/Navigation/routes.dart';
 import 'package:flutter_getx_wireframe/Utils/extensions/size_extension.dart';
 import 'package:flutter_getx_wireframe/Widgets/app_scaffold.dart';
-import 'package:flutter_getx_wireframe/Widgets/form/AppFormFields/FloatingField/index.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../Config/themes/text_styles.dart';
-import '../../Config/themes/sizes.dart';
 import '../../Controller/locale/localization_service_controller.dart';
 import '../../Services/apiController/auth_api_controller.dart';
 import '../../Widgets/app_divider.dart';
 import '../../Widgets/buttons/app_text_button.dart';
 import '../../Widgets/buttons/social_button.dart';
 import '../../Widgets/check_box.dart';
-import '../../Widgets/form/AppFormFields/NonFloatingField/index.dart';
 import '../../Widgets/form/unified_input_field.dart';
 import '../../Widgets/headers/auth_header.dart';
 import '../../Widgets/buttons/primary_button.dart';
@@ -70,11 +67,8 @@ class SignInState extends State<SignIn> {
 
   Future<void> handleSignIn() async {
     if (_formKey.currentState!.saveAndValidate()) {
-      final formData = _formKey.currentState!.value;
-
-      // Add keepMeSignedIn to form data
+      final formData = Map<String, dynamic>.from(_formKey.currentState!.value);
       formData['keepMeSignedIn'] = keepMeSignedIn;
-
       await authDataGetX.signIn(context, formData);
     }
   }
@@ -126,9 +120,7 @@ class SignInState extends State<SignIn> {
               children: [
                 // Form Fields
                 ...formFields.asMap().entries.map((entry) {
-                  final index = entry.key;
                   final field = entry.value;
-                  final isLastField = index == formFields.length - 1;
                   final isPasswordField = field['name'] == 'Password';
 
                   // return AppFormFieldFloating(
@@ -156,15 +148,14 @@ class SignInState extends State<SignIn> {
                   // );
 
                   return UnifiedInputField(
-                      style: InputFieldStyle.standard,
-                      name: field['name']!,
-                      label: field['label'],
-                      hintText: field['placeHolder'],
-                      isPassword: isPasswordField,
-                      validator: field['validators'],
-                      isRequired: field['required'],
+                    style: InputFieldStyle.standard,
+                    name: field['name']!,
+                    label: field['label'],
+                    hintText: field['placeHolder'],
+                    isPassword: isPasswordField,
+                    // validator: field['validators'],
+                    isRequired: field['required'],
                   );
-
                 }),
 
                 20.height,
