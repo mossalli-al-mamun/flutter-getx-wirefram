@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import '../../Controller/form/form_controller.dart';
 import '../../Controller/form/form_field_config.dart';
+import 'unified_dropdown_field.dart';
 import 'unified_input_field.dart';
 
 class DynamicForm extends StatelessWidget {
@@ -295,19 +296,49 @@ class DynamicForm extends StatelessWidget {
 
   // Dropdown Field
   Widget _buildDropdownField(BuildContext context, FormFieldConfig field) {
-    return DropdownButtonFormField<dynamic>(
+    // return DropdownButtonFormField<dynamic>(
+    //   initialValue: controller.getFieldValue(field.name),
+    //   decoration: buildInputDecoration(
+    //     context: context,
+    //     style: InputFieldStyle.floating,
+    //     hintText: field.placeholder,
+    //     prefixIcon: field.prefixIcon,
+    //   ),
+    //   items: field.options?.map((option) {
+    //     return DropdownMenuItem(
+    //       value: option.value,
+    //       enabled: option.isEnabled,
+    //       child: Text(option.label),
+    //     );
+    //   }).toList(),
+    //   validator: (value) {
+    //     if (field.isRequired && value == null) {
+    //       return '${field.label} is required';
+    //     }
+    //     return field.validator?.call(value);
+    //   },
+    //   onChanged: field.isEnabled ? (value) {
+    //     controller.updateField(field.name, value);
+    //     field.onChanged?.call(value, controller.getFormData());
+    //     controller.updateFieldVisibility(fields);
+    //   } : null,
+    // );
+    return UnifiedDropdownField(
+      name: field.name,
+      label: field.label,
+      hintText: field.placeholder,
       initialValue: controller.getFieldValue(field.name),
-      decoration: buildInputDecoration(
-        context: context,
-        style: InputFieldStyle.standard,
-        hintText: field.placeholder,
-        prefixIcon: field.prefixIcon,
-      ),
-      items: field.options?.map((option) {
-        return DropdownMenuItem(
+      isRequired: field.isRequired,
+      style: InputFieldStyle.floating,
+      showSearchBox: false,
+      prefixIcon: field.prefixIcon ?? Icons.public,
+      isEnabled: field.isEnabled,
+      options: field.options?.map((option) {
+        return DropdownOption(
           value: option.value,
-          enabled: option.isEnabled,
-          child: Text(option.label),
+          label: option.label,
+          icon: option.icon,
+          isEnabled: option.isEnabled,
         );
       }).toList(),
       validator: (value) {
@@ -316,11 +347,11 @@ class DynamicForm extends StatelessWidget {
         }
         return field.validator?.call(value);
       },
-      onChanged: field.isEnabled ? (value) {
+      onChanged: (value) {
         controller.updateField(field.name, value);
         field.onChanged?.call(value, controller.getFormData());
         controller.updateFieldVisibility(fields);
-      } : null,
+      },
     );
   }
 
