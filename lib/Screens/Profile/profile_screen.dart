@@ -98,10 +98,16 @@ class ProfileScreen extends StatelessWidget {
 
     controller.initialize(fields);
 
+    // return JobApplicationFormExample();
+    // return FeedbackFormExample();
+    // return ProfileFormExample();
+    // return SignUpFormExample();
+
     return AppScaffold(
       body: Padding(
         padding: EdgeInsets.only(top: 20),
-        child: DynamicForm(
+        child:
+        DynamicForm(
           controller: controller,
           fields: fields,
           submitButton: Padding(
