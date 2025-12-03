@@ -28,7 +28,13 @@ class _BottomTabsState extends State<BottomTabs> {
       scrollable: false,
       useSafeArea: true,
       padding: EdgeInsets.zero,
+      // standard mode
       body: _pages[_currentIndex],
+      // alive mode
+      // body: IndexedStack(
+      //   index: _currentIndex,
+      //   children: _pages,
+      // ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
