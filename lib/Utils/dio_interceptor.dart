@@ -19,7 +19,9 @@ class DioInterceptors extends Interceptor {
 
   @override
   Future<void> onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     appLogger('REQUEST[${options.method}] => PATH: ${options.path}');
 
     token = await TokenManager().readToken();
@@ -31,18 +33,24 @@ class DioInterceptors extends Interceptor {
     /// OTP validation token
     validOtpToken = validOtpToken != null ? jsonDecode(validOtpToken) : '';
 
-    if (userdata == null) {
+    // Only use OTP token when no user is logged in AND OTP token is a non-empty string
+    if (userdata == null && validOtpToken is String && (validOtpToken).isNotEmpty) {
       token = validOtpToken;
     }
+
     token ??= validOtpToken;
 
     // Resolve current language code
     final savedLocale = LocalStorageManager.readData('locale');
-    final String langCode = (get_x.Get.locale?.languageCode ?? (savedLocale is String ? savedLocale : null) ?? 'en').toString();
+    final String langCode =
+        (get_x.Get.locale?.languageCode ??
+                (savedLocale is String ? savedLocale : null) ??
+                'en')
+            .toString();
     // Skip token for login (or any unauthenticated endpoint)
     final isLoginEndpoint =
         options.path.contains('/jwt-auth/v1/token') ||
-            options.path.contains('/wp-json/jwt-auth/v1/token');
+        options.path.contains('/wp-json/jwt-auth/v1/token');
 
     if (!isLoginEndpoint) {
       // Only add token if not login request
@@ -56,23 +64,38 @@ class DioInterceptors extends Interceptor {
 
     appLogger('REQUEST[${options.method}] => PATH: ${options.uri}');
 
-
     return handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     appLogger(
-        'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+      'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
+    );
     super.onResponse(response, handler);
   }
 
   @override
   Future onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401 || err.response?.statusCode == 403) {
+    final status = err.response?.statusCode;
+    final path = err.requestOptions.path;
+
+    if (status == 401 || status == 403) {
+      // force Never force logout/navigation for login/auth endpoints; let caller handle inline errors.
+      final bool isLoginEndpoint =
+          path.contains('/jwt-auth/v1/token') ||
+          path.contains('/wp-json/jwt-auth/v1/token');
+      if (isLoginEndpoint) {
+        return super.onError(err, handler);
+      }
+
       final now = DateTime.now();
-      if (_isRedirecting && _lastRedirectAt != null && now.difference(_lastRedirectAt!) < _redirectCooldown) {
-        appLogger('Auth error received but redirect already in progress. Skipping duplicate navigation.');
+      if (_isRedirecting &&
+          _lastRedirectAt != null &&
+          now.difference(_lastRedirectAt!) < _redirectCooldown) {
+        appLogger(
+          'Auth error received but redirect already in progress. Skipping duplicate navigation.',
+        );
         return super.onError(err, handler);
       }
       _isRedirecting = true;
@@ -88,7 +111,8 @@ class DioInterceptors extends Interceptor {
       Future.delayed(_redirectCooldown, () => _isRedirecting = false);
     }
     appLogger(
-        'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
+      'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}',
+    );
     super.onError(err, handler);
   }
 }
