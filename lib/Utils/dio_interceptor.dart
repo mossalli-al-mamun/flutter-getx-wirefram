@@ -12,6 +12,11 @@ import 'token_manager.dart';
 class DioInterceptors extends Interceptor {
   String? token = '';
 
+  // Guard to prevent double navigation to SignIn on multiple concurrent 401/403 responses
+  static bool _isRedirecting = false;
+  static DateTime? _lastRedirectAt;
+  static const Duration _redirectCooldown = Duration(seconds: 2);
+
   @override
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
@@ -64,10 +69,23 @@ class DioInterceptors extends Interceptor {
 
   @override
   Future onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
+    if (err.response?.statusCode == 401 || err.response?.statusCode == 403) {
+      final now = DateTime.now();
+      if (_isRedirecting && _lastRedirectAt != null && now.difference(_lastRedirectAt!) < _redirectCooldown) {
+        appLogger('Auth error received but redirect already in progress. Skipping duplicate navigation.');
+        return super.onError(err, handler);
+      }
+      _isRedirecting = true;
+      _lastRedirectAt = now;
+
+      // Clear auth artifacts
       await TokenManager().deleteToken();
-      // Navigate to the login page if response is 401
+
+      // Navigate to the login page if unauthorized/forbidden
       Get.offAll(const SignIn());
+
+      // Reset redirect guard after short cooldown to allow future legitimate redirects
+      Future.delayed(_redirectCooldown, () => _isRedirecting = false);
     }
     appLogger(
         'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
