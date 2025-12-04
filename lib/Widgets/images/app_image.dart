@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_getx_wireframe/Config/themes/extensions/colors_ext.dart';
 
-import '../app_loaders.dart';
+import '../loaders/app_loaders.dart';
 
 class AppImage extends StatelessWidget {
   final String? imageUrl;

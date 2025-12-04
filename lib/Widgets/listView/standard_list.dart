@@ -3,7 +3,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_getx_wireframe/Config/themes/extensions/colors_ext.dart';
 import 'package:get/get.dart';
 
-import '../../../../Widgets/app_loaders.dart';
+import '../loaders/app_loaders.dart';
 import '../../Controller/locale/localization_service_controller.dart';
 import '../empty_state_widget.dart';
 

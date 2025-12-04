@@ -11,7 +11,7 @@ import 'Screens/DashBoard/index.dart';
 import 'Utils/local_storage_manager.dart';
 import 'Utils/pop_scope_wrapper.dart';
 import 'Utils/token_manager.dart';
-import 'Widgets/app_loaders.dart';
+import 'Widgets/loaders/app_loaders.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'Utils/global_variables.dart';
 

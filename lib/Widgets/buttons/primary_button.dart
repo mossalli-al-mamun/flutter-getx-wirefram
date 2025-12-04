@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_getx_wireframe/Config/themes/appStyles/index.dart';
 import 'package:flutter_getx_wireframe/Config/themes/extensions/colors_ext.dart';
 import '../../Config/themes/app_colors.dart';
-import '../app_loaders.dart';
+import '../loaders/app_loaders.dart';
 
 enum IconPosition { start, end }
 

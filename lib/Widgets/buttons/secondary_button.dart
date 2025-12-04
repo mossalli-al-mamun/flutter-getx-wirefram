@@ -93,7 +93,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_getx_wireframe/Config/themes/appStyles/index.dart';
 import 'package:flutter_getx_wireframe/Config/themes/extensions/colors_ext.dart';
-import '../app_loaders.dart';
+import '../loaders/app_loaders.dart';
 import 'primary_button.dart';
 
 

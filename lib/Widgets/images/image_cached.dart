@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../Utils/app_logger.dart';
-import '../app_loaders.dart';
+import '../loaders/app_loaders.dart';
 
 class ImageCached extends StatelessWidget {
   final String? imageUrl;
