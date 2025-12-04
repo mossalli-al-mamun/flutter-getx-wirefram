@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
-/// A reusable pulsing/glowing icon widget.
+/// A reusable pulsing/glowing icon widget with default icon & color.
 /// Can be used for success, error, info, or any custom icon/color.
 class AnimatedStatusIcon extends StatefulWidget {
-  final IconData icon; // Custom icon
-  final Color color; // Icon/gradient accent color
-  final double size; // Total widget size
-  final Duration duration; // Animation duration
-  final bool pulse; // If true, enable pulsing animation
+  final IconData icon;
+  final Color color;
+  final double size;
+  final Duration duration;
+  final bool pulse;
 
+  /// Default icon: check_circle_outline_rounded
+  /// Default color: green
   const AnimatedStatusIcon({
     super.key,
-    required this.icon,
-    required this.color,
+    this.icon = Icons.check_circle_outline_rounded,
+    this.color = Colors.green,
     this.size = 84,
     this.duration = const Duration(milliseconds: 1400),
     this.pulse = true,
@@ -36,9 +38,7 @@ class _AnimatedStatusIconState extends State<AnimatedStatusIcon>
       duration: widget.duration,
     );
 
-    if (widget.pulse) {
-      _controller.repeat(reverse: true);
-    }
+    if (widget.pulse) _controller.repeat(reverse: true);
 
     _scale = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
@@ -97,18 +97,3 @@ class _AnimatedStatusIconState extends State<AnimatedStatusIcon>
     );
   }
 }
-
-///example
-//// Info
-// AnimatedStatusIcon(
-//   icon: Icons.info_outline_rounded,
-//   color: Colors.blue,
-// );
-//
-// // Custom size & pulse off
-// AnimatedStatusIcon(
-//   icon: Icons.star,
-//   color: Colors.orange,
-//   size: 60,
-//   pulse: false,
-// );
