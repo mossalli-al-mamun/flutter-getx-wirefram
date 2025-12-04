@@ -131,6 +131,46 @@ class _SampleAnimationsState extends State<SampleAnimations>
     //   ),
     // ),
 
+    //Breathing Gradient with ico
+    // Positioned.fill(child: AnimatedBuilder(
+    //   animation: _controller,
+    //   builder: (context, _) {
+    //     return Transform.scale(
+    //       scale: _scale.value,
+    //       child: Container(
+    //         width: 96,
+    //         height: 96,
+    //         decoration: BoxDecoration(
+    //           shape: BoxShape.circle,
+    //           gradient: LinearGradient(
+    //             colors: [
+    //               theme.colorScheme.primary
+    //                   .withValues(alpha: 0.25 + _glow.value * 0.15),
+    //               theme.colorScheme.primary
+    //                   .withValues(alpha: 0.45 + _glow.value * 0.25),
+    //             ],
+    //             begin: Alignment.topLeft,
+    //             end: Alignment.bottomRight,
+    //           ),
+    //           boxShadow: [
+    //             BoxShadow(
+    //               color: theme.colorScheme.primary
+    //                   .withValues(alpha: _glow.value),
+    //               blurRadius: 24,
+    //               spreadRadius: 2,
+    //             ),
+    //           ],
+    //         ),
+    //         child: const Icon(
+    //           Icons.check_rounded,
+    //           size: 48,
+    //           color: Colors.white,
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // ));
+
     //Shimmer
     // Positioned.fill(
     //   child: IgnorePointer(
