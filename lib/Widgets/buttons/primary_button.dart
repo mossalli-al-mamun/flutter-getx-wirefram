@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_getx_wireframe/Config/themes/appStyles/index.dart';
-import 'package:flutter_getx_wireframe/Config/themes/extensions/colors_ext.dart';
+import 'package:flutter_getx_wireframe/Config/themes/extensions/context_ext.dart';
 import '../../Config/themes/app_colors.dart';
 import '../loaders/app_loaders.dart';
 
@@ -19,7 +19,8 @@ class PrimaryButton extends StatelessWidget {
   final IconPosition iconPosition;
   final MainAxisAlignment? mainAxisAlignment;
   final bool? shrinkWrap;
-  final bool iconWithText; // New parameter
+  final bool iconWithText;
+  final double elevation;
 
   const PrimaryButton({
     super.key,
@@ -36,15 +37,16 @@ class PrimaryButton extends StatelessWidget {
     this.mainAxisAlignment,
     this.shrinkWrap = false,
     this.iconWithText = false, // Default: space between
+    this.elevation = 4.0
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final effectiveColor =
-    isDisable == true ? context.disabledColor : color ?? context.primary;
-    final foregroundColor =
-        textColor ?? theme.colorScheme.onPrimary;
+    final effectiveColor = isDisable == true
+        ? context.disabledColor
+        : color ?? context.primary;
+    // final foregroundColor = textColor ?? theme.colorScheme.onPrimary;
+    final foregroundColor = textColor ?? Colors.white;
 
     final bool shrink = shrinkWrap == true && width == null;
 
@@ -60,68 +62,73 @@ class PrimaryButton extends StatelessWidget {
       effectiveAlignment = MainAxisAlignment.center;
     }
 
-    return SizedBox(
-      height: height,
-      width: shrink ? null : width ?? double.infinity,
-      child: Stack(
-        children: [
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: effectiveColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              minimumSize: const Size(65, 55),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            onPressed: isDisable == true || isLoading == true ? null : onPressed,
-            child: Row(
-              mainAxisSize: shrink ? MainAxisSize.min : MainAxisSize.max,
-              mainAxisAlignment: effectiveAlignment,
-              children: [
-                // Start Icon
-                if (icon != null && iconPosition == IconPosition.start) ...[
-                  Icon(icon, color: foregroundColor),
-                  const SizedBox(width: 8),
-                ],
-
-                // Label Text
-                Flexible(
-                  child: Text(
-                    label ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                    style: AppTextStyle.titleMedium.copyWith(color: foregroundColor),
-                  ),
-                ),
-
-                // End Icon
-                if (icon != null && iconPosition == IconPosition.end) ...[
-                  const SizedBox(width: 8),
-                  Icon(icon, color: foregroundColor),
-                ],
-              ],
-            ),
-          ),
-
-          // Loading Overlay
-          if (isLoading == true)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black38,
+    return Material(
+      elevation: elevation,
+      borderRadius: BorderRadius.circular(5),
+      child: SizedBox(
+        height: height,
+        width: shrink ? null : width ?? double.infinity,
+        child: Stack(
+          children: [
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: effectiveColor,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Center(
-                  child: AppLoader(
-                    color: AppColors.whiteColor,
-                    size: .7,
+                minimumSize: Size(65, height!),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onPressed: isDisable == true || isLoading == true
+                  ? null
+                  : onPressed,
+              child: Row(
+                mainAxisSize: shrink ? MainAxisSize.min : MainAxisSize.max,
+                mainAxisAlignment: effectiveAlignment,
+                children: [
+                  // Start Icon
+                  if (icon != null && iconPosition == IconPosition.start) ...[
+                    Icon(icon, color: foregroundColor),
+                    const SizedBox(width: 8),
+                  ],
+
+                  // Label Text
+                  Flexible(
+                    child: Text(
+                      label ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: AppTextStyle.titleMedium.copyWith(
+                        color: isDisable == true ? context.disabledColor : foregroundColor,
+                      ),
+                    ),
+                  ),
+
+                  // End Icon
+                  if (icon != null && iconPosition == IconPosition.end) ...[
+                    const SizedBox(width: 8),
+                    Icon(icon, color: foregroundColor),
+                  ],
+                ],
+              ),
+            ),
+
+            // Loading Overlay
+            if (isLoading == true)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black38,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Center(
+                    child: AppLoader(color: AppColors.whiteColor, size: .7),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -164,4 +171,3 @@ class PrimaryButton extends StatelessWidget {
 //   iconWithText: false,
 //   onPressed: () {},
 // )
-

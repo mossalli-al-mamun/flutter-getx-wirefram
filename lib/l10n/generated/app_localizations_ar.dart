@@ -367,4 +367,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get spanish => 'الإسبانية';
+
+  @override
+  String get close => 'Close';
 }

@@ -929,6 +929,11 @@ class S {
   String get spanish {
     return Intl.message('Spanish', name: 'spanish', desc: '', args: []);
   }
+
+  /// `Close`
+  String get close {
+    return Intl.message('Close', name: 'close', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -130,7 +130,10 @@
   "selectLanguage": "Select language",
   "profileUpdated": "Profile updated",
   "name": "Name",
+
   "english": "English",
   "arabic": "Arabic",
-  "spanish": "Spanish"
+  "spanish": "Spanish",
+
+  "close": "Close"
 }
