@@ -2,6 +2,116 @@ import 'package:flutter/material.dart';
 import '../../Config/themes/text_styles.dart';
 import '../../Config/themes/extensions/colors_ext.dart';
 
+// ==================== NAVIGATION HEADER ====================
+
+class NavigationHeader extends StatelessWidget implements PreferredSizeWidget {
+  final String? title;
+  final String? subTitle;
+  final TextStyle? titleStyle;
+  final TextStyle? subTitleStyle;
+  final Color? titleColor;
+  final Color? subTitleColor;
+  final Color? backgroundColor;
+  final bool showBackButton;
+  final VoidCallback? onBackPressed;
+  final Widget? leading;
+  final List<Widget>? actions;
+  final bool centerTitle;
+  final double? elevation;
+  final double? leadingWidth;
+  final double titleSpacing;
+  final IconData backIcon;
+  final Color? backIconColor;
+  final double? backIconSize;
+  final Widget? flexibleSpace;
+  final PreferredSizeWidget? bottom;
+  final double? toolbarHeight;
+  final double? titlePadding;
+  final IconThemeData? iconTheme;
+  final Widget? titleWidget;
+
+  const NavigationHeader({
+    super.key,
+    this.title,
+    this.subTitle,
+    this.titleStyle,
+    this.subTitleStyle,
+    this.titleColor,
+    this.subTitleColor,
+    this.backgroundColor,
+    this.showBackButton = true,
+    this.onBackPressed,
+    this.leading,
+    this.actions,
+    this.centerTitle = false,
+    this.elevation,
+    this.leadingWidth,
+    this.titleSpacing = 0,
+    this.backIcon = Icons.arrow_back,
+    this.backIconColor,
+    this.backIconSize,
+    this.flexibleSpace,
+    this.bottom,
+    this.toolbarHeight,
+    this.titlePadding = 16,
+    this.iconTheme,
+    this.titleWidget,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: backgroundColor ?? context.scaffoldBackgroundColor,
+      elevation: elevation,
+      centerTitle: centerTitle,
+      automaticallyImplyLeading: false,
+      leadingWidth: leadingWidth,
+      titleSpacing: titleSpacing,
+      toolbarHeight: toolbarHeight ?? kToolbarHeight,
+      leading: leading ?? (showBackButton ? _buildBackButton(context) : null),
+      title:
+          titleWidget ??
+          ((title != null || subTitle != null)
+              ? Padding(
+                  padding: EdgeInsets.only(left: titlePadding!),
+                  child: CustomHeader(
+                    title: title ?? '',
+                    subTitle: subTitle,
+                    titleStyle: titleStyle,
+                    subTitleStyle: subTitleStyle,
+                    titleColor: titleColor,
+                    subTitleColor: subTitleColor,
+                    alignment: centerTitle
+                        ? CrossAxisAlignment.center
+                        : CrossAxisAlignment.start,
+                  ),
+                )
+              : null),
+      actions: actions,
+      flexibleSpace: flexibleSpace,
+      bottom: bottom,
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return IconButton(
+      padding: const EdgeInsets.only(left: 4),
+      icon: Icon(
+        backIcon,
+        color: backIconColor ?? context.iconColor,
+        size: backIconSize,
+      ),
+      onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
+    );
+  }
+
+  @override
+  Size get preferredSize {
+    final height = toolbarHeight ?? kToolbarHeight;
+    final bottomHeight = bottom?.preferredSize.height ?? 0;
+    return Size.fromHeight(height + bottomHeight);
+  }
+}
 
 class CustomHeader extends StatelessWidget {
   final String title;
@@ -56,106 +166,6 @@ class CustomHeader extends StatelessWidget {
         ],
       ],
     );
-  }
-}
-
-// ==================== NAVIGATION HEADER ====================
-
-class NavigationHeader extends StatelessWidget implements PreferredSizeWidget {
-  final String? title;
-  final String? subTitle;
-  final TextStyle? titleStyle;
-  final TextStyle? subTitleStyle;
-  final Color? titleColor;
-  final Color? subTitleColor;
-  final Color? backgroundColor;
-  final bool showBackButton;
-  final VoidCallback? onBackPressed;
-  final Widget? leading;
-  final List<Widget>? actions;
-  final bool centerTitle;
-  final double? elevation;
-  final double? leadingWidth;
-  final double titleSpacing;
-  final IconData backIcon;
-  final Color? backIconColor;
-  final double? backIconSize;
-  final Widget? flexibleSpace;
-  final PreferredSizeWidget? bottom;
-  final double? toolbarHeight;
-
-  const NavigationHeader({
-    super.key,
-    this.title,
-    this.subTitle,
-    this.titleStyle,
-    this.subTitleStyle,
-    this.titleColor,
-    this.subTitleColor,
-    this.backgroundColor,
-    this.showBackButton = true,
-    this.onBackPressed,
-    this.leading,
-    this.actions,
-    this.centerTitle = false,
-    this.elevation,
-    this.leadingWidth,
-    this.titleSpacing = 0,
-    this.backIcon = Icons.arrow_back,
-    this.backIconColor,
-    this.backIconSize,
-    this.flexibleSpace,
-    this.bottom,
-    this.toolbarHeight,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: backgroundColor ?? context.scaffoldBackgroundColor,
-      elevation: elevation,
-      centerTitle: centerTitle,
-      automaticallyImplyLeading: false,
-      leadingWidth: leadingWidth,
-      titleSpacing: titleSpacing,
-      toolbarHeight: toolbarHeight ?? kToolbarHeight,
-      leading: leading ?? (showBackButton ? _buildBackButton(context) : null),
-      title: (title != null || subTitle != null)
-          ? CustomHeader(
-        title: title ?? '',
-        subTitle: subTitle,
-        titleStyle: titleStyle,
-        subTitleStyle: subTitleStyle,
-        titleColor: titleColor,
-        subTitleColor: subTitleColor,
-        alignment: centerTitle
-            ? CrossAxisAlignment.center
-            : CrossAxisAlignment.start,
-      )
-          : null,
-      actions: actions,
-      flexibleSpace: flexibleSpace,
-      bottom: bottom,
-    );
-  }
-
-  Widget _buildBackButton(BuildContext context) {
-    return IconButton(
-      padding: const EdgeInsets.only(left: 4),
-      icon: Icon(
-        backIcon,
-        color: backIconColor ?? context.iconColor,
-        size: backIconSize,
-      ),
-      onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
-    );
-  }
-
-  @override
-  Size get preferredSize {
-    final height = toolbarHeight ?? kToolbarHeight;
-    final bottomHeight = bottom?.preferredSize.height ?? 0;
-    return Size.fromHeight(height + bottomHeight);
   }
 }
 
