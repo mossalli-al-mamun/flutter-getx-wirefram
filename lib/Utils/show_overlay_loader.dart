@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../Widgets/app_loaders.dart';
+import '../Widgets/loaders/app_loaders.dart';
 
 class LoaderHelper {
   static OverlayEntry? _currentLoader;

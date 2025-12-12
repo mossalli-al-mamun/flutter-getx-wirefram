@@ -367,4 +367,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spanish => 'Spanish';
+
+  @override
+  String get close => 'Close';
 }

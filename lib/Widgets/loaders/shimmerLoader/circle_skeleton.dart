@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../Config/themes/app_sizes.dart';
+
+import '../../../Config/themes/app_sizes.dart';
 import 'shimmer_palette.dart';
 
 /// A reusable circular or rounded avatar shimmer placeholder.
