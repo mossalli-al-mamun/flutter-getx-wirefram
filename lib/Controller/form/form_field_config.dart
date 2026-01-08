@@ -3,6 +3,7 @@
 // ==========================
 
 import 'package:flutter/material.dart';
+import '../../Widgets/form/unified_dropdown_field.dart';
 
 enum FormFieldType {
   text,
@@ -31,6 +32,7 @@ class FormFieldConfig {
   final String? Function(dynamic)? validator;
   final bool isRequired;
   final bool isEnabled;
+  final bool isReadOnly;
 
   // Icon properties
   final IconData? prefixIcon;
@@ -38,6 +40,7 @@ class FormFieldConfig {
 
   // Field-specific properties
   final List<FormFieldOption>? options; // For radio, dropdown, checkbox
+  final Future<List<DropdownOption>> Function(String filter, int page)? onFind; // For async dropdown
   final int? maxLines;
   final int? minLines;
   final int? maxLength;
@@ -55,6 +58,9 @@ class FormFieldConfig {
   final bool Function(Map<String, dynamic>)? showWhen;
   final Function(dynamic, Map<String, dynamic>)? onChanged;
 
+  final bool passFullObject;
+  final String? initialLabel;
+
   FormFieldConfig({
     required this.name,
     required this.label,
@@ -67,6 +73,7 @@ class FormFieldConfig {
     this.prefixIcon,
     this.suffixIcon,
     this.options,
+    this.onFind,
     this.maxLines,
     this.minLines,
     this.maxLength,
@@ -79,6 +86,9 @@ class FormFieldConfig {
     this.alignment,
     this.showWhen,
     this.onChanged,
+    this.isReadOnly = false,
+    this.passFullObject = true,
+    this.initialLabel,
   });
 }
 

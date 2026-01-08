@@ -35,15 +35,22 @@ class DynamicForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ...fields.map((field) => Obx(() {
-              final isVisible = controller.fieldVisibility[field.name] ?? true;
-              if (!isVisible) return const SizedBox.shrink();
+            ...fields.map(
+              (field) => Obx(() {
+                final isVisible =
+                    controller.fieldVisibility[field.name] ?? true;
+                if (!isVisible) return const SizedBox.shrink();
 
-              return Padding(
-                padding: EdgeInsets.only(bottom: spacing ?? field.spacing),
-                child: _buildField(context, field),
-              );
-            })),
+                return Padding(
+                  padding: EdgeInsets.only(bottom: spacing ?? field.spacing),
+                  child: _buildField(
+                    context,
+                    field,
+                    controller.fieldTypes[field.name] ?? field.type,
+                  ),
+                );
+              }),
+            ),
             if (submitButton != null) submitButton!,
           ],
         ),
@@ -51,13 +58,17 @@ class DynamicForm extends StatelessWidget {
     );
   }
 
-  Widget _buildField(BuildContext context, FormFieldConfig field) {
-    switch (field.type) {
+  Widget _buildField(
+    BuildContext context,
+    FormFieldConfig field,
+    FormFieldType type,
+  ) {
+    switch (type) {
       case FormFieldType.text:
       case FormFieldType.email:
       case FormFieldType.phone:
       case FormFieldType.number:
-        return _buildTextField(context, field);
+        return _buildTextField(context, field, type);
 
       case FormFieldType.password:
         return _buildPasswordField(context, field);
@@ -87,65 +98,76 @@ class DynamicForm extends StatelessWidget {
         return _buildSwitchField(context, field);
 
       default:
-        return _buildTextField(context, field);
+        return _buildTextField(context, field, type);
     }
   }
 
-  // Text Field
-  Widget _buildTextField(BuildContext context, FormFieldConfig field) {
-    return UnifiedInputField(
-      controller: TextEditingController(
-        text: controller.getFieldValue(field.name)?.toString() ?? '',
-      ),
-      name: field.name,
-      label: field.label,
-      hintText: field.placeholder,
-      prefixIcon: field.prefixIcon,
-      suffixIcon: field.suffixIcon,
-      keyboardType: _getKeyboardType(field.type),
-      maxLength: field.maxLength,
-      isEnabled: field.isEnabled,
-      isRequired: field.isRequired,
-      validator: (value) {
-        if (field.isRequired && (value == null || value.trim().isEmpty)) {
-          return '${field.label} is required';
-        }
-        return field.validator?.call(value);
-      },
-      onChanged: (value) {
-        controller.updateField(field.name, value);
-        field.onChanged?.call(value, controller.getFormData());
-        controller.updateFieldVisibility(fields);
-      },
-    );
+  Widget _buildTextField(
+    BuildContext context,
+    FormFieldConfig field,
+    FormFieldType type,
+  ) {
+    return Obx(() {
+      // Get the current value from the controller
+      final currentValue =
+          controller.getFieldValue(field.name)?.toString() ?? '';
+
+      return UnifiedInputField(
+        // Don't create controller here - let UnifiedInputField handle it internally
+        // Or pass the initialValue if UnifiedInputField supports it
+        initialValue: currentValue,
+        name: field.name,
+        label: field.label,
+        hintText: field.placeholder,
+        prefixIcon: field.prefixIcon,
+        suffixIcon: field.suffixIcon,
+        keyboardType: _getKeyboardType(type),
+        maxLength: field.maxLength,
+        isEnabled: field.isEnabled,
+        isRequired: field.isRequired,
+        validator: (value) {
+          if (field.isRequired && (value == null || value.trim().isEmpty)) {
+            return '${field.label} is required';
+          }
+          return field.validator?.call(value);
+        },
+        onChanged: (value) {
+          controller.updateField(field.name, value);
+          field.onChanged?.call(value, controller.getFormData());
+          controller.updateFieldVisibility(fields);
+        },
+      );
+    });
   }
 
   // Password Field
   Widget _buildPasswordField(BuildContext context, FormFieldConfig field) {
     final RxBool obscureText = true.obs;
 
-    return Obx(() => UnifiedInputField(
-      controller: TextEditingController(
-        text: controller.getFieldValue(field.name)?.toString() ?? '',
+    return Obx(
+      () => UnifiedInputField(
+        controller: TextEditingController(
+          text: controller.getFieldValue(field.name)?.toString() ?? '',
+        ),
+        name: field.name,
+        label: field.label,
+        hintText: field.placeholder,
+        prefixIcon: field.prefixIcon ?? Icons.lock_outline,
+        suffixIcon: obscureText.value ? Icons.visibility_off : Icons.visibility,
+        onSuffixTap: () => obscureText.value = !obscureText.value,
+        isRequired: field.isRequired,
+        validator: (value) {
+          if (field.isRequired && (value == null || value.trim().isEmpty)) {
+            return '${field.label} is required';
+          }
+          return field.validator?.call(value);
+        },
+        onChanged: (value) {
+          controller.updateField(field.name, value);
+          field.onChanged?.call(value, controller.getFormData());
+        },
       ),
-      name: field.name,
-      label: field.label,
-      hintText: field.placeholder,
-      prefixIcon: field.prefixIcon ?? Icons.lock_outline,
-      suffixIcon: obscureText.value ? Icons.visibility_off : Icons.visibility,
-      onSuffixTap: () => obscureText.value = !obscureText.value,
-      isRequired: field.isRequired,
-      validator: (value) {
-        if (field.isRequired && (value == null || value.trim().isEmpty)) {
-          return '${field.label} is required';
-        }
-        return field.validator?.call(value);
-      },
-      onChanged: (value) {
-        controller.updateField(field.name, value);
-        field.onChanged?.call(value, controller.getFormData());
-      },
-    ));
+    );
   }
 
   // Text Area Field
@@ -190,30 +212,41 @@ class DynamicForm extends StatelessWidget {
           children: [
             Text(
               field.label + (field.isRequired ? ' *' : ''),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: field.options?.map((option) {
-                return Obx(() {
-                  final isSelected = controller.getFieldValue(field.name) == option.value;
-                  return RadioOptionCard(
-                    label: option.label,
-                    icon: option.icon,
-                    isSelected: isSelected,
-                    onTap: option.isEnabled ? () {
-                      controller.updateField(field.name, option.value);
-                      formFieldState.didChange(option.value);
-                      field.onChanged?.call(option.value, controller.getFormData());
-                      controller.updateFieldVisibility(fields);
-                    } : null,
-                  );
-                });
-              }).toList() ?? [],
+              children:
+                  field.options?.map((option) {
+                    return Obx(() {
+                      final isSelected =
+                          controller.getFieldValue(field.name) == option.value;
+                      return RadioOptionCard(
+                        label: option.label,
+                        icon: option.icon,
+                        isSelected: isSelected,
+                        onTap: option.isEnabled
+                            ? () {
+                                controller.updateField(
+                                  field.name,
+                                  option.value,
+                                );
+                                formFieldState.didChange(option.value);
+                                field.onChanged?.call(
+                                  option.value,
+                                  controller.getFormData(),
+                                );
+                                controller.updateFieldVisibility(fields);
+                              }
+                            : null,
+                      );
+                    });
+                  }).toList() ??
+                  [],
             ),
             if (formFieldState.hasError)
               Padding(
@@ -248,35 +281,44 @@ class DynamicForm extends StatelessWidget {
           children: [
             Text(
               field.label + (field.isRequired ? ' *' : ''),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             ...field.options?.map((option) {
-              return Obx(() {
-                final selectedValues = List<dynamic>.from(
-                    controller.getFieldValue(field.name) ?? []
-                );
-                final isSelected = selectedValues.contains(option.value);
+                  return Obx(() {
+                    final selectedValues = List<dynamic>.from(
+                      controller.getFieldValue(field.name) ?? [],
+                    );
+                    final isSelected = selectedValues.contains(option.value);
 
-                return CheckboxListTile(
-                  title: Text(option.label),
-                  value: isSelected,
-                  enabled: option.isEnabled,
-                  onChanged: option.isEnabled ? (bool? checked) {
-                    if (checked == true) {
-                      selectedValues.add(option.value);
-                    } else {
-                      selectedValues.remove(option.value);
-                    }
-                    controller.updateField(field.name, selectedValues);
-                    formFieldState.didChange(selectedValues);
-                    field.onChanged?.call(selectedValues, controller.getFormData());
-                  } : null,
-                );
-              });
-            }).toList() ?? [],
+                    return CheckboxListTile(
+                      title: Text(option.label),
+                      value: isSelected,
+                      enabled: option.isEnabled,
+                      onChanged: option.isEnabled
+                          ? (bool? checked) {
+                              if (checked == true) {
+                                selectedValues.add(option.value);
+                              } else {
+                                selectedValues.remove(option.value);
+                              }
+                              controller.updateField(
+                                field.name,
+                                selectedValues,
+                              );
+                              formFieldState.didChange(selectedValues);
+                              field.onChanged?.call(
+                                selectedValues,
+                                controller.getFormData(),
+                              );
+                            }
+                          : null,
+                    );
+                  });
+                }).toList() ??
+                [],
             if (formFieldState.hasError)
               Padding(
                 padding: const EdgeInsets.only(top: 8, left: 12),
@@ -296,33 +338,6 @@ class DynamicForm extends StatelessWidget {
 
   // Dropdown Field
   Widget _buildDropdownField(BuildContext context, FormFieldConfig field) {
-    // return DropdownButtonFormField<dynamic>(
-    //   initialValue: controller.getFieldValue(field.name),
-    //   decoration: buildInputDecoration(
-    //     context: context,
-    //     style: InputFieldStyle.floating,
-    //     hintText: field.placeholder,
-    //     prefixIcon: field.prefixIcon,
-    //   ),
-    //   items: field.options?.map((option) {
-    //     return DropdownMenuItem(
-    //       value: option.value,
-    //       enabled: option.isEnabled,
-    //       child: Text(option.label),
-    //     );
-    //   }).toList(),
-    //   validator: (value) {
-    //     if (field.isRequired && value == null) {
-    //       return '${field.label} is required';
-    //     }
-    //     return field.validator?.call(value);
-    //   },
-    //   onChanged: field.isEnabled ? (value) {
-    //     controller.updateField(field.name, value);
-    //     field.onChanged?.call(value, controller.getFormData());
-    //     controller.updateFieldVisibility(fields);
-    //   } : null,
-    // );
     return UnifiedDropdownField(
       name: field.name,
       label: field.label,
@@ -330,15 +345,17 @@ class DynamicForm extends StatelessWidget {
       initialValue: controller.getFieldValue(field.name),
       isRequired: field.isRequired,
       style: InputFieldStyle.floating,
-      showSearchBox: false,
+      showSearchBox: field.onFind != null,
       prefixIcon: field.prefixIcon ?? Icons.public,
       isEnabled: field.isEnabled,
+      onFind: field.onFind,
+      initialLabel: field.initialLabel,
       options: field.options?.map((option) {
         return DropdownOption(
           value: option.value,
           label: option.label,
           icon: option.icon,
-          isEnabled: option.isEnabled,
+          // isEnabled: option.isEnabled,
         );
       }).toList(),
       validator: (value) {
@@ -347,6 +364,7 @@ class DynamicForm extends StatelessWidget {
         }
         return field.validator?.call(value);
       },
+      passFullObject: field.passFullObject,
       onChanged: (value) {
         controller.updateField(field.name, value);
         field.onChanged?.call(value, controller.getFormData());
@@ -357,43 +375,61 @@ class DynamicForm extends StatelessWidget {
 
   // Date Field
   Widget _buildDateField(BuildContext context, FormFieldConfig field) {
-    return UnifiedInputField(
-      controller: TextEditingController(
-        text: field.formatter?.call(controller.getFieldValue(field.name)) ??
-            controller.getFieldValue(field.name)?.toString() ?? '',
-      ),
-      name: field.name,
-      label: field.label,
-      hintText: field.placeholder,
-      prefixIcon: field.prefixIcon ?? Icons.calendar_today,
-      readOnly: true,
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: controller.getFieldValue(field.name) ?? DateTime.now(),
-          firstDate: DateTime(1900),
-          lastDate: DateTime(2100),
-        );
-        if (date != null) {
-          controller.updateField(field.name, date);
-          field.onChanged?.call(date, controller.getFormData());
-        }
-      },
-      validator: (value) {
-        if (field.isRequired && controller.getFieldValue(field.name) == null) {
-          return '${field.label} is required';
-        }
-        return field.validator?.call(controller.getFieldValue(field.name));
-      },
-    );
+    return Obx(() {
+      final value = controller.getFieldValue(field.name);
+      String text = '';
+      if (value is DateTime) {
+        text =
+            "${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}";
+      } else if (value != null) {
+        text = value.toString();
+      }
+
+      return UnifiedInputField(
+        controller: TextEditingController(text: text),
+        name: field.name,
+        label: field.label,
+        hintText: field.placeholder,
+        prefixIcon: field.prefixIcon ?? Icons.calendar_today,
+        readOnly: true,
+        onTap: () async {
+          DateTime initialDate = DateTime.now();
+          if (value is DateTime) {
+            initialDate = value;
+          } else if (value is String) {
+            initialDate = DateTime.tryParse(value) ?? DateTime.now();
+          }
+
+          final date = await showDatePicker(
+            context: context,
+            initialDate: initialDate,
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100),
+          );
+          if (date != null) {
+            controller.updateField(field.name, date);
+            field.onChanged?.call(date, controller.getFormData());
+          }
+        },
+        validator: (val) {
+          if (field.isRequired &&
+              controller.getFieldValue(field.name) == null) {
+            return '${field.label} is required';
+          }
+          return field.validator?.call(controller.getFieldValue(field.name));
+        },
+      );
+    });
   }
 
   // Time Field
   Widget _buildTimeField(BuildContext context, FormFieldConfig field) {
     return UnifiedInputField(
       controller: TextEditingController(
-        text: field.formatter?.call(controller.getFieldValue(field.name)) ??
-            controller.getFieldValue(field.name)?.toString() ?? '',
+        text:
+            field.formatter?.call(controller.getFieldValue(field.name)) ??
+            controller.getFieldValue(field.name)?.toString() ??
+            '',
       ),
       name: field.name,
       label: field.label,
@@ -422,7 +458,8 @@ class DynamicForm extends StatelessWidget {
   // Slider Field
   Widget _buildSliderField(BuildContext context, FormFieldConfig field) {
     return Obx(() {
-      final value = (controller.getFieldValue(field.name) ?? field.min ?? 0).toDouble();
+      final value = (controller.getFieldValue(field.name) ?? field.min ?? 0)
+          .toDouble();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -436,10 +473,12 @@ class DynamicForm extends StatelessWidget {
             max: field.max ?? 100,
             divisions: field.divisions,
             label: field.formatter?.call(value) ?? value.toString(),
-            onChanged: field.isEnabled ? (newValue) {
-              controller.updateField(field.name, newValue);
-              field.onChanged?.call(newValue, controller.getFormData());
-            } : null,
+            onChanged: field.isEnabled
+                ? (newValue) {
+                    controller.updateField(field.name, newValue);
+                    field.onChanged?.call(newValue, controller.getFormData());
+                  }
+                : null,
           ),
         ],
       );
@@ -454,11 +493,13 @@ class DynamicForm extends StatelessWidget {
         title: Text(field.label),
         subtitle: field.placeholder != null ? Text(field.placeholder!) : null,
         value: value,
-        onChanged: field.isEnabled ? (newValue) {
-          controller.updateField(field.name, newValue);
-          field.onChanged?.call(newValue, controller.getFormData());
-          controller.updateFieldVisibility(fields);
-        } : null,
+        onChanged: field.isEnabled
+            ? (newValue) {
+                controller.updateField(field.name, newValue);
+                field.onChanged?.call(newValue, controller.getFormData());
+                controller.updateFieldVisibility(fields);
+              }
+            : null,
       );
     });
   }
